@@ -4,7 +4,7 @@
 """
 import pandas as pd
 
-EDGE_CHAR = ' '
+EDGE_SYMBOL = ' '
 WORD_BREAK = ' '
 NODE_BREAK = '\n'
 
@@ -21,9 +21,10 @@ def get_the_first_block(lines):
 
     # keep adding the line with the first edge_char trimmed to the list of
     # block_lines, until we hit a line that does not start with edge_char
+    # TODO: This loop may be extracted into a function and be turned into a generator
     for line in lines_iter:
-        if line.startswith(EDGE_CHAR):
-            block_lines.append(line[len(EDGE_CHAR):])
+        if line.startswith(EDGE_SYMBOL):
+            block_lines.append(line[len(EDGE_SYMBOL):])
         else:
             rest_lines.append(line)
             break
@@ -34,11 +35,15 @@ def get_the_first_block(lines):
 
 
 def get_blocks(lines):
+    # TODO: we can have a lazy (generator) version of this function
     rest_lines = lines
+    blocks = []
     while rest_lines:
         node, block_lines, rest_lines = get_the_first_block(rest_lines)
-        blocks = list(get_blocks(block_lines))
-        yield [node.split(WORD_BREAK)] + blocks
+        blocks = get_blocks(block_lines)
+        blocks.append([node.split(WORD_BREAK)] + blocks)
+
+    return blocks
 
 
 def str_to_tn(str_):
@@ -48,13 +53,13 @@ def str_to_tn(str_):
     probably should be) parsed lazily.
     """
     lines = str_.split(NODE_BREAK)
-    return list(get_blocks(lines))
+    return get_blocks(lines)
 
 
 def tn_to_lines(tn, lvl=0):
     lines = []
     for node, *blocks in tn:
-        lines.append(EDGE_CHAR * lvl + WORD_BREAK.join(node))
+        lines.append(EDGE_SYMBOL * lvl + WORD_BREAK.join(node))
         lines += tn_to_lines(blocks, lvl + 1)
     return lines
 
@@ -178,7 +183,7 @@ g
 
     print(example_tree)
 
-    result = list(str_to_tn(example_tree))
+    result = str_to_tn(example_tree)
     print(result)
 
     print(str(result) == str(answer))
