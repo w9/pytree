@@ -79,6 +79,16 @@ def get_node_in(tn, indices):
     return node
 
 
+def set_node_in(tn, indices, new_node):
+    """Immutable. A new TN is returned.
+    """
+    blocks = tn
+    for index in indices[:-1]:
+        node, *blocks = blocks[index]
+
+    blocks[indices[-1]][0] = new_node
+
+
 def reverse(tn):
     """Reverse the root level.
 
@@ -144,42 +154,6 @@ def records_to_csv(tn, index=False):
 
 
 def test():
-    example_tree = """\
-a b
- c d
-  e
-  f
-g
-   h
-   i
-   j"""
-
-    answer = [
-        [
-            ['a', 'b'],
-            [
-                ['c', 'd'],
-                [
-                    ['e'],
-                ],
-                [
-                    ['f'],
-                ],
-            ],
-        ],
-        [
-            ['g'],
-            [
-                ['', '', 'h'],
-                [
-                    ['', 'i'],
-                    [
-                        ['j'],
-                    ],
-                ],
-            ],
-        ],
-    ]
 
     print(example_tree)
 
